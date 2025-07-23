@@ -1230,10 +1230,12 @@
             </div>
         </div>
 
+
+
         <div class="footer">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Contact Support</a>
+            <a href="privacyPolicy.jsp">Privacy Policy</a>
+                <a href="termsOfService.jsp">Terms of Service</a>
+                <a href="contactSupport.jsp">Contact Support</a>
             <p>&copy; 2025 Contact Manager. All rights reserved.</p>
         </div>
     </div>
