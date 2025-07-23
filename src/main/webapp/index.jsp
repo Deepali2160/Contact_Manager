@@ -56,7 +56,7 @@
             padding: 20px;
             font-family: 'Poppins', sans-serif;
             color: var(--text-color-dark);
-            overflow: hidden;
+            overflow-y: auto;
             transition: background 0.5s ease, color 0.5s ease;
         }
 
@@ -68,8 +68,8 @@
         .container {
             width: 100%;
             max-width: 1200px;
-            height: 90vh;
-            max-height: 800px;
+            min-height: 90vh;
+            max-height: none;
             background: var(--card-bg-dark);
             backdrop-filter: blur(12px);
             border-radius: 30px;
