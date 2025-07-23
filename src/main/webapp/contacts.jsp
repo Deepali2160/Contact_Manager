@@ -1020,24 +1020,7 @@
             <p>&copy; 2025 Contact Manager. All rights reserved.</p>
         </div>
     </div>
-        table, th, td {
-              color: inherit; /* Ensure text inherits from parent */
-          }
 
-          /* Explicitly set text colors for light mode */
-          body.light-mode #contactsTableBody td {
-              color: var(--text-color-light);
-          }
-
-          /* Explicitly set text colors for dark mode */
-          body #contactsTableBody td {
-              color: var(--text-color-dark);
-          }
-
-          /* Update the no-contacts message */
-          body.light-mode .no-contacts {
-              color: var(--text-secondary-light);
-          }
     <script>
         // Theme toggle functionality
         const modeToggle = document.getElementById('themeToggle');

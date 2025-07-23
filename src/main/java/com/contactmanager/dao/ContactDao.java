@@ -303,4 +303,5 @@ public class ContactDao {
         }
         return contacts;
     }
+
 }

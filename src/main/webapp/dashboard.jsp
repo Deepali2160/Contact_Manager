@@ -14,6 +14,7 @@
         return;
     }
 
+
     // Initialize avatar initial
     String avatarInitial = "?";
     if (loggedInUser.getName() != null && !loggedInUser.getName().isEmpty()) {

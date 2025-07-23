@@ -101,4 +101,3 @@ public class EditContactServlet extends HttpServlet {
 
     }
 }
-
