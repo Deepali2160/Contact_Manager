@@ -1,4 +1,6 @@
-<%@ page import="com.contactmanager.model.User" %>
+
+<%@ page import="com.yash.contactmanager.model.User" %>
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html>

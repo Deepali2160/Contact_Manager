@@ -1,6 +1,7 @@
 <%@ page import="java.util.List" %>
-<%@ page import="com.contactmanager.model.Contact" %>
-<%@ page import="com.contactmanager.model.User" %>
+<%@ page import="com.yash.contactmanager.model.User" %>
+<%@ page import="com.yash.contactmanager.model.Contact" %>
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html>
