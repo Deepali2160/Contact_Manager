@@ -1,0 +1,374 @@
+use contactdb;
+select * from users;
+create database contact;
+use contact;
+Create table users(
+id int primary key auto_increment,
+name varchar(100) not null,
+email varchar(100) not null,
+password varchar(100) not null,
+phone varchar(20),
+profile_pic varchar(225),
+about text,
+created_at timestamp default current_timestamp);
+select * from users;
+use contactdb;
+show tables;
+show databases;
+drop database contactdb;
+create database contactdb;
+use contactdb;
+create table users(
+id int primary key auto_increment,
+name varchar(100) not null,
+email varchar(100) not null,
+password varchar(100) not null,
+phone varchar(20),
+profile_pic varchar(255),
+about text,
+created_at timestamp default current_timestamp);
+select*from users;
+create table contacts(
+id INT auto_increment primary key,
+user_id int not null,
+name varchar(100) not null,
+email varchar(100),
+phone varchar(20),
+address varchar(255),
+created_at timestamp default current_timestamp,
+foreign key (user_id) references users (id) on delete cascade
+);
+alter table contacts add column created_at timestamp default current_timestamp;
+alter table contacts add column is_favorite boolean default false;
+
+create table activities(
+id int auto_increment primary key,
+user_id int not null,
+contact_id int,
+action_type enum('ADD','UPDATE','DELETE','REMINDER','FAVORITE','EXPORT') NOT NULL,
+description varchar(255) not null,
+activity_date timestamp default current_timestamp,
+foreign key (user_id) references users(id),
+foreign key (contact_id) references contacts(id)
+);
+
+create table reminders (
+id int auto_increment primary key,
+user_id int not null,
+contact_id int,
+title varchar (100) not null,
+description text,
+reminder_date datetime not null,
+priority enum('HIGH','MEDIUM','LOW') NOT NULL DEFAULT 'MEDIUM',
+type ENUM('BIRTHDAY','ANNIVERSARY','MEETING','TASK','OTHER') NOT NULL,
+foreign key (user_id) references users(id),
+foreign key (contact_id) references contacts(id)
+);
+SET SQL_SAFE_UPDATES = 0;
+UPDATE contacts SET created_at = NOW() WHERE created_at IS NULL;
+SET SQL_SAFE_UPDATES = 1;
+describe contacts;
+select * from users;
+ALTER TABLE contacts ADD COLUMN photo_path VARCHAR(255);
+ALTER TABLE contacts ADD COLUMN notes TEXT;
+ALTER TABLE contacts ADD COLUMN birthday DATE;
+ALTER TABLE contacts ADD COLUMN anniversary DATE;
+----------------------------------------------------------------------------------------------------------
+
+
+CREATE DATABASE cabin_booking;
+USE cabin_booking;
+
+-- Users Table (First - no dependencies)
+CREATE TABLE Users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  position VARCHAR(100) NOT NULL,
+  user_type ENUM('NORMAL','VIP','ADMIN','SUPER_ADMIN') DEFAULT 'NORMAL',
+  status ENUM('ACTIVE','INACTIVE') DEFAULT 'ACTIVE',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Cabins Table (Second - no dependencies, NO IMAGE COLUMN)
+CREATE TABLE Cabins (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  capacity INT NOT NULL,
+  amenities TEXT,
+  is_vip_only BOOLEAN DEFAULT FALSE,
+  status ENUM('AVAILABLE','MAINTENANCE','UNAVAILABLE') DEFAULT 'AVAILABLE',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Bookings Table (Third - depends on Users and Cabins)
+CREATE TABLE Bookings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  cabin_id INT NOT NULL,
+  booking_type ENUM('SINGLE_DAY','MULTIPLE_DAYS') NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE,
+  time_slot VARCHAR(50),
+  purpose VARCHAR(255) NOT NULL,
+  status ENUM('PENDING','APPROVED','REJECTED','REALLOCATED') DEFAULT 'PENDING',
+  approved_by INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+  FOREIGN KEY (cabin_id) REFERENCES Cabins(id) ON DELETE CASCADE,
+  FOREIGN KEY (approved_by) REFERENCES Users(id) ON DELETE SET NULL
+);
+
+-- Insert Sample Users
+INSERT INTO Users (name, email, password, position, user_type) VALUES
+('John Admin', 'admin@yashtech.com', 'admin123', 'Manager', 'ADMIN'),
+('Sarah VIP', 'vip@yashtech.com', 'vip123', 'Director', 'VIP'),
+('Mike Normal', 'user@yashtech.com', 'user123', 'Developer', 'NORMAL'),
+('Super Admin', 'superadmin@yashtech.com', 'super123', 'CEO', 'SUPER_ADMIN');
+
+-- Insert Sample Cabins (WITHOUT IMAGES)
+INSERT INTO Cabins (name, capacity, amenities, is_vip_only, status) VALUES
+('Conference Room A', 10, 'Projector, Whiteboard, AC', FALSE, 'AVAILABLE'),
+('Meeting Room B', 6, 'TV Screen, Coffee Machine', FALSE, 'AVAILABLE'),
+('Executive Suite', 4, 'Premium Furniture, Video Conference', TRUE, 'AVAILABLE'),
+('Training Hall', 20, 'Projector, Sound System, Podium', FALSE, 'AVAILABLE'),
+('VIP Boardroom', 8, 'Luxury Setting, Smart Board', TRUE, 'AVAILABLE');
+
+-- User preferences for AI recommendations
+CREATE TABLE UserPreferences (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  preferred_capacity INT,
+  preferred_amenities TEXT,
+  meeting_purposes TEXT, -- JSON: ["presentation", "meeting", "training"]
+  booking_frequency INT DEFAULT 0,
+  avg_booking_duration DECIMAL(5,2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
+
+-- Cabin analytics for AI learning
+CREATE TABLE CabinAnalytics (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  cabin_id INT NOT NULL,
+  total_bookings INT DEFAULT 0,
+  successful_bookings INT DEFAULT 0,
+  avg_duration DECIMAL(5,2) DEFAULT 0,
+  popular_time_slots TEXT, -- JSON: {"morning": 45, "afternoon": 30, "evening": 25}
+  popular_purposes TEXT,   -- JSON: {"meeting": 60, "presentation": 25, "training": 15}
+  utilization_rate DECIMAL(5,2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (cabin_id) REFERENCES Cabins(id) ON DELETE CASCADE
+);
+
+-- AI recommendation logs for learning
+CREATE TABLE RecommendationLogs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  recommended_cabin_ids TEXT, -- JSON array of recommended cabin IDs
+  selected_cabin_id INT,
+  purpose VARCHAR(100),
+  team_size INT,
+  recommendation_score DECIMAL(5,2),
+  was_accepted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+  FOREIGN KEY (selected_cabin_id) REFERENCES Cabins(id) ON DELETE SET NULL
+);
+--------------------------------------------------------------------------------------------------------
+CREATE DATABASE IF NOT EXISTS cabin_booking1;
+USE cabin_booking1;
+
+-- USERS TABLE
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    user_type ENUM('NORMAL','VIP','ADMIN','SUPER_ADMIN') DEFAULT 'NORMAL',
+    default_company_id INT,
+    status ENUM('ACTIVE','INACTIVE') DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- COMPANIES TABLE
+CREATE TABLE companies (
+    company_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    location VARCHAR(200),
+    contact_info VARCHAR(500),
+    status ENUM('ACTIVE','INACTIVE') DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CABINS TABLE
+CREATE TABLE cabins (
+    cabin_id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    capacity INT NOT NULL,
+    amenities TEXT,
+    is_vip_only BOOLEAN DEFAULT FALSE,
+    location VARCHAR(200),
+    status ENUM('ACTIVE','MAINTENANCE','INACTIVE') DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(company_id)
+);
+
+-- BOOKINGS TABLE
+CREATE TABLE bookings (
+    booking_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    cabin_id INT NOT NULL,
+    booking_date DATE NOT NULL,
+    time_slot VARCHAR(20) NOT NULL,
+    purpose TEXT NOT NULL,
+    status ENUM('PENDING','APPROVED','REJECTED','CANCELLED') DEFAULT 'PENDING',
+    priority_level ENUM('NORMAL','HIGH','VIP') DEFAULT 'NORMAL',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    approved_by INT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (cabin_id) REFERENCES cabins(cabin_id)
+);
+-- ✅ Add missing booking_type column to your existing bookings table
+ALTER TABLE bookings
+ADD COLUMN booking_type ENUM('SINGLE_DAY', 'MULTI_DAY', 'RECURRING', 'EMERGENCY')
+NOT NULL DEFAULT 'SINGLE_DAY'
+AFTER purpose;
+-- ✅ Add the missing approved_at column
+ALTER TABLE bookings
+ADD COLUMN approved_at TIMESTAMP NULL
+AFTER approved_by;
+
+SHOW COLUMNS FROM bookings;
+DESCRIBE bookings;
+-- USER PREFERENCES (for AI)
+CREATE TABLE user_preferences (
+    preference_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    preferred_cabin_capacity INT,
+    preferred_time_slot VARCHAR(20),
+    booking_frequency INT DEFAULT 0,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- INSERT SAMPLE DATA
+INSERT INTO companies (name, location, contact_info) VALUES
+('TechCorp Solutions', 'Gurgaon', 'contact@techcorp.com'),
+('InnovateLabs', 'Bangalore', 'hello@innovatelabs.com');
+
+INSERT INTO users (name, email, password, user_type, default_company_id) VALUES
+('Admin User', 'admin@techcorp.com', 'admin123', 'ADMIN', 1),
+('John Doe', 'john@techcorp.com', 'user123', 'NORMAL', 1),
+('Jane VIP', 'jane@techcorp.com', 'vip123', 'VIP', 1);
+
+INSERT INTO cabins (company_id, name, capacity, amenities, is_vip_only, location) VALUES
+(1, 'Conference Room A', 10, 'Projector, Whiteboard', FALSE, 'Ground Floor'),
+(1, 'Executive Suite', 6, 'Premium Setup', TRUE, 'Top Floor'),
+(1, 'Meeting Room B', 8, 'Whiteboard, AC', FALSE, 'First Floor');
+-------------------------------------------------------------------------------------------------------
+select * from users;
+DELETE FROM users WHERE user_id = 1;
+DELETE FROM users WHERE user_id = 2;
+DELETE FROM users WHERE user_id = 3;
+DELETE FROM users WHERE user_id = 4;
+DELETE FROM users WHERE user_id = 5;
+select * from companies;
+UPDATE users
+SET user_type = 'SUPER_ADMIN'
+WHERE user_id = 5;
+DESCRIBE bookings;
+SELECT * FROM users WHERE user_type IN ('ADMIN', 'SUPER_ADMIN');
+
+-------------------------------------------------------------------------------------------------------
+-- Backup current data (if any)
+CREATE TABLE companies_backup AS SELECT * FROM companies;
+
+-- Foreign key checks को disable करें
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- अब आप कोई भी table drop कर सकते हैं
+DROP TABLE companies;
+
+-- Foreign key checks को वापस enable करें (जरूरी!)
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- Create simplified version with single company config
+CREATE TABLE company_config (
+    company_name VARCHAR(100) DEFAULT 'Yash Technology',
+    company_location VARCHAR(200) DEFAULT 'Indore',
+    company_contact VARCHAR(500) DEFAULT 'contact@yashtech.com',
+    company_status ENUM('ACTIVE','INACTIVE') DEFAULT 'ACTIVE',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Insert single configuration
+INSERT INTO company_config VALUES (
+    'Yash Technology',
+    'Indore',
+    'contact@yashtech.com',
+    'ACTIVE',
+    NOW()
+);
+show tables;
+-- Check company_config table structure
+DESCRIBE company_config;
+describe cabins;
+describe bookings;
+describe users;
+select * from users;
+-- Single company configuration
+SELECT * FROM company_config;
+-- पहले existing data को safe करें
+UPDATE cabins SET company_id = 1 WHERE company_id IS NULL OR company_id = 0;
+
+-- Default value set करें
+ALTER TABLE cabins MODIFY COLUMN company_id INT DEFAULT 1;
+
+-- Verify करें कि सब कुछ सही है
+SELECT cabin_id, company_id, name FROM cabins LIMIT 5;
+-- Run this in your database
+SELECT
+    COUNT(*) as total_users,
+    SUM(CASE WHEN user_type = 'NORMAL' THEN 1 ELSE 0 END) as normal_users,
+    SUM(CASE WHEN user_type = 'VIP' THEN 1 ELSE 0 END) as vip_users,
+    SUM(CASE WHEN user_type IN ('ADMIN', 'SUPER_ADMIN') THEN 1 ELSE 0 END) as admin_users
+FROM users
+WHERE status = 'ACTIVE';
+select* from users;
+select * from cabins;
+select * from bookings;
+describe users;
+describe cabins;
+-- Add missing columns to bookings table:
+ALTER TABLE bookings
+ADD COLUMN rejected_at TIMESTAMP NULL AFTER approved_at,
+ADD COLUMN rejected_by INT NULL AFTER approved_by;
+
+-- Add foreign key constraint:
+ALTER TABLE bookings
+ADD FOREIGN KEY (rejected_by) REFERENCES users(user_id);
+
+-- ✅ STEP 1: Backup existing data first
+CREATE TABLE users_backup AS SELECT * FROM users;
+CREATE TABLE bookings_backup AS SELECT * FROM bookings;
+
+--------------
+-- ✅ Method 2: Using WHERE with primary keys
+SET SQL_SAFE_UPDATES = 0;
+
+DELETE FROM bookings WHERE booking_id > 0;
+DELETE FROM users WHERE user_id > 0;
+
+ALTER TABLE bookings AUTO_INCREMENT = 1;
+ALTER TABLE users AUTO_INCREMENT = 1;
+
+SET SQL_SAFE_UPDATES = 1;
+
+
+
